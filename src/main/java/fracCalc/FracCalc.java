@@ -13,7 +13,11 @@ public class FracCalc {
 		// TODO: Read the input from the user and call produceAnswer with an equation
 		Scanner userInput = new Scanner(System.in);
 		String equation = userInput.nextLine();
-		produceAnswer(equation);
+		while (!equation.equals("quit")) {
+			System.out.println(produceAnswer(equation));
+			equation = userInput.nextLine();
+		}
+
 	}
 
 	// ** IMPORTANT ** DO NOT DELETE THIS FUNCTION. This function will be used to
@@ -33,11 +37,50 @@ public class FracCalc {
 		String operand1 = input.substring(0, index);
 		String operator = input.substring(index + 1, index + 2);
 		String operand2 = input.substring(index + 3);
+		String answer = operand1 + operator + operand2;
 
-		return operand2;
+		String op2Num = Num(operand2);
+		String op2Den = Den(operand2);
+		String op2Whol = Whole(operand2);
+
+		String op2Value = "whole:" + op2Whol + " numerator:" + op2Num + " denominator:" + op2Den;
+		return op2Value;
 	}
 
 	// TODO: Fill in the space below with any helper methods that you think you will
 	// need
+	public static String Whole(String a) {
+		if (a.indexOf("_") != -1) {
+			// mixed 
+			return a.substring(0, a.indexOf("_"));
+		} else if (a.indexOf("/") != -1) {
+			// impartial
+				return "0";
+			} else {
+				return a;
+			}
+		}
 
+	public static String Num(String a) {
+		if (a.indexOf("_") != -1) {
+			// mixed fraction
+			return a.substring(a.indexOf("_") + 1, a.indexOf(("/")));
+		} else if (a.indexOf("/") != -1) {
+			// impartial
+			return a.substring(a.indexOf("_") + 1, a.indexOf("/"));
+		} else {
+			// whole
+			return "0";
+		}
+	}
+
+	public static String Den(String a) {
+		if (a.indexOf("/") != -1) {
+			// mixed or impartial fraction
+			return a.substring(a.indexOf("/") + 1);
+		} else {
+			// whole
+			return "1";
+		}
+	}
 }
