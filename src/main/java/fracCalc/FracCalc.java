@@ -9,15 +9,25 @@ import java.util.*;
 import net.sf.saxon.functions.Substring;
 
 public class FracCalc {
+	static int den1 = 1;
+	static int num1 = 0;
+	static int whole1 = 0;
+	static int den2 = 1;
+	static int num2 = 0;
+	static int whole2 = 0;
+	static int recipro = 1;
+	static int whole = 0;
+	static int frac = 0;
+
 	public static void main(String[] args) {
 		// TODO: Read the input from the user and call produceAnswer with an equation
 		Scanner userInput = new Scanner(System.in);
 		String equation = userInput.nextLine();
 		while (!equation.equals("quit")) {
 			System.out.println(produceAnswer(equation));
-			equation = userInput.nextLine();		
+			equation = userInput.nextLine();
 		}
-
+		userInput.close();
 	}
 
 	// ** IMPORTANT ** DO NOT DELETE THIS FUNCTION. This function will be used to
@@ -38,49 +48,92 @@ public class FracCalc {
 		String operand1 = input.substring(0, index);
 		String operator = input.substring(index + 1, index + 2);
 		String operand2 = input.substring(index + 3);
-		
-		String op1Whol = Whole(operand1);
-		String op1Num = Num(operand1);
-		String op1Den = Den(operand1);
-		String op2Num = Num(operand2);
-		String op2Den = Den(operand2);
-		String op2Whol = Whole(operand2);
-		
-		int num1 = Integer.parseInt(Num(operand1));
-		int num2 = Integer.parseInt(Num(operand2));
-		int whole1 = Integer.parseInt(Whole(operand1));
-		int whole2 = Integer.parseInt(Whole(operand2));
-		int den1 = Integer.parseInt(Den(operand1));
-		int den2 = Integer.parseInt(Den(operand2));
-		int num3 = 0;
-		int den3 = 0;
-		int total = 0;
-		
-		String op2Value = "whole:" + op2Whol + " numerator:" + op2Num + " denominator:" + op2Den;
-		
-		num1 = num1 + Math.abs(whole1) * den1;
-		num2 = num2 + Math.abs(whole2) * den2;
-		if (whole1 < 0){
+
+		den1 = 1;
+		num1 = 0;
+		whole1 = 0;
+		den2 = 1;
+		num2 = 0;
+		whole2 = 0;
+		recipro = 1;
+		whole = 0;
+		frac = 0;
+		String answer = "0";
+
+		// both mixed numbers
+		if (operand2.indexOf("/") >= 0 && operand1.indexOf("/") >= 0) {
+			num2 = Integer.parseInt(Num(operand2));
+			den2 = Integer.parseInt(Den(operand2));
+			whole2 = Integer.parseInt(Whole(operand2));
+			num1 = Integer.parseInt(Num(operand1));
+			den1 = Integer.parseInt(Den(operand1));
+			whole1 = Integer.parseInt(Whole(operand1));
+		} else if (operand2.indexOf("/") >= 0) {
+			whole1 = Integer.parseInt(Whole(operand1));
+			num2 = Integer.parseInt(Num(operand2));
+			den2 = Integer.parseInt(Den(operand2));
+			whole2 = Integer.parseInt(Whole(operand2));
+		} else if (operand1.indexOf("/") >= 0) {
+			whole2 = Integer.parseInt(Whole(operand2));
+			num1 = Integer.parseInt(Num(operand1));
+			den1 = Integer.parseInt(Den(operand1));
+			whole1 = Integer.parseInt(Whole(operand1));
+		} else {
+			whole1 = Integer.parseInt(Whole(operand1));
+			whole2 = Integer.parseInt(Whole(operand2));
+		}
+
+		if (whole1 < 0) {
 			num1 *= -1;
 		}
-		if (whole2 < 0){
+		num1 = (whole1 * den1) + num1;
+		whole1 = 0;
+		if (whole2 < 0) {
 			num2 *= -1;
 		}
+		num2 = (whole2 * den2) + num2;
+		whole2 = 0;
 		if (operator.equals("+")) {
-			num3 = (num1 * den2) + (num2 * den1);
-			den3 = (den1 * den2);
-		} else if (operator.equals("-")) {
-			num3 = (num1 * den2) - (num2 * den1);
-			den3= (den1 * den2);
-		} else if (operator.equals("*")){
-			num3 = (num1 * num2);
-			den3 = (den1 * den2);
-		}else if (operator.equals("/")) {
-			num3 = (num1 * den2);
-			den3 = (den1 * num2);
+			num1 *= den2;
+			num2 *= den1;
+			den1 *= den2;
+			den2 = den1;
+			num1 += num2;
+			whole = num1 / den1;
+			frac = Math.abs(num1 % den1);
+		} else if (operator.equals("*")) {
+			num1 *= num2;
+			den1 *= den2;
+			whole = num1 / den1;
+			frac = num1 % den1;
+		} else if (operator.equals("/")) {
+			recipro = den2;
+			den2 = num2;
+			num1 *= recipro;
+			den1 *= den2;
+			whole = num1 / den1;
+			frac = num1 % den1;
+		} else {
+			num1 *= den2;
+			num2 *= den1;
+			den1 *= den2;
+			den2 = den1;
+			num1 -= num2;
+			whole = num1 / den1;
+			frac = num1 % den1;
 		}
-		String result = (num3 + "/" + den3);
-		return result;
+		int factor = gdc(frac, den1);
+		frac /= factor;
+		den1 /= factor;
+		
+		if (frac != 0 && whole != 0) {
+			answer = (whole + "_" + Math.abs(frac) + "/" + Math.abs(den1));
+		} else if (frac != 0 && whole == 0) {
+			answer = (frac + "/" + Math.abs(den1));
+		} else if (frac == 0 & whole != 0) {
+			answer = (whole + "");
+		}
+		return answer;
 	}
 
 	// TODO: Fill in the space below with any helper methods that you think you will
@@ -121,5 +174,12 @@ public class FracCalc {
 			// whole
 			return "1";
 		}
+	}
+
+	public static int gdc(int num1, int num2) {
+		if (num2 == 0) {
+			return num1;
+		}
+		return gdc(num2, num1 % num2);
 	}
 }
